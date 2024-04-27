@@ -55,8 +55,6 @@ def load_data(dataset):
         return 
     if response.status_code == 200:
         write_to_raw_storage(data[0], dataset)   
-        
 
 load_data("products")
 load_data("vendors")
-
