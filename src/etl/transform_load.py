@@ -6,47 +6,56 @@ from datetime import datetime, timedelta
 import os 
 from typing import List
 from io import StringIO
+import numpy as np 
 
 def read_from_raw_storage(dataset):
 
     BASE_DIR = f"raw/{dataset}"
     with open(f"{BASE_DIR}/_LATEST","r") as f:
         latest_data_path = f.read()
-    return pd.read_csv(f"{latest_data_path}/data.csv"), latest_data_path
+    return pd.read_csv(f"{latest_data_path}/data.csv")
 
-def _transform_product(df: pd.DataFrame, date:str, hour:str, minute:str):
-    df["updated_at"] = date 
-    df["hour"] = hour
-    df["minute"] = minute 
 
-    return df
-
-def _transform_vendors(df:pd.DataFrame, date:str, hour:str, minute:str):
-    df["updated_at"] = date 
-    df["hour"] = hour
-    df["minute"] = minute 
-
-    return df
-
-def transform(dataset):
+def transform():
     
+    
+    products_columns_renamed = dict(zip(
+        ["Item","Category","Vendor","Sale Price","Stock Status"],
+        ["item","category", "vendor", "sale_price", "stock_status"]
+    ))
+    vendors_columns_renamed = dict(zip(
+        ["Vendor Name","Shipping Cost","Customer Review Score","Number of Feedbacks"],
+        ["vendor", "shipping_cost","customer_review_score", "number_of_feedbacks"]
+    ))  
 
-    df, metadata = read_from_raw_storage(dataset)
-    date = metadata.split("/")[2]
-    hour = metadata.split("/")[3].split("-")[0]
-    minute = metadata.split("/")[3].split("-")[1]
+    df_products = read_from_raw_storage("products")
+    df_vendors = read_from_raw_storage("vendors")
 
-    if dataset == "products":
-        return _transform_product(df,date,hour,minute)
-    if dataset == "vendors":
-        return _transform_vendors(df,date,hour, minute)
+    df_products.rename(columns = products_columns_renamed, inplace = True)
+    df_vendors.rename(columns = vendors_columns_renamed, inplace = True)
 
+    df_products = df_products.astype({
+        "item": np.string_,
+        "category": np.string_, 
+        "vendor": np.string_, 
+        "sale_price": np.float64, 
+        "stock_status": np.string_
+    })
+
+    df_vendors = df_vendors.astype({
+        "vendor": np.string_, 
+        "shipping_cost": np.float64,
+        "customer_review_score": np.float64,
+        "number_of_feedbacks": np.int32
+    })
+
+    df_flat = df_products.merge(df_vendors, on = "vendor", how="inner")
+    df_flat.drop(["Unnamed: 0.1_x",  "Unnamed: 0_x"], axis = 1,inplace=True)
+    return df_flat
 
 def load_to_db():
     pass
 
-t_products = transform("products")
-t_vendors = transform("vendors")
+data = transform()
 
-print(t_products.head())
-print(t_vendors.head())
+print(data.head())
