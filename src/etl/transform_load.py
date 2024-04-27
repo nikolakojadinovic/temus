@@ -30,7 +30,7 @@ def _transform_vendors(df:pd.DataFrame, date:str, hour:str, minute:str):
 
 def transform(dataset):
     
-    
+
     df, metadata = read_from_raw_storage(dataset)
     date = metadata.split("/")[2]
     hour = metadata.split("/")[3].split("-")[0]
