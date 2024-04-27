@@ -16,8 +16,7 @@ def read_from_raw_storage(dataset):
     return pd.read_csv(f"{latest_data_path}/data.csv")
 
 
-def transform():
-    
+def pre_transform():
     
     products_columns_renamed = dict(zip(
         ["Item","Category","Vendor","Sale Price","Stock Status"],
@@ -51,11 +50,21 @@ def transform():
 
     df_flat = df_products.merge(df_vendors, on = "vendor", how="inner")
     df_flat.drop(["Unnamed: 0.1_x",  "Unnamed: 0_x"], axis = 1,inplace=True)
+
     return df_flat
 
-def load_to_db():
+def create_aggregated_views():
+    #implement one time materialized views creation
     pass
 
-data = transform()
+def refresh_aggregated_views():
+    #implement refreshing materialized views after ingestion to flat table
+    pass 
+
+def load_to_db(data:pd.DataFrame):
+    #Implemet writing df_flat returned from transform directly to postgres
+    pass
+
+data = pre_transform()
 
 print(data.head())
