@@ -291,6 +291,10 @@ services:
     ports:
       - "5432:5432" 
 
+  flask_app:
+    build: ./src/be/
+    ports:
+      - 5000:5000
 volumes:
   postgres-db-volume:
   postgres_data:
