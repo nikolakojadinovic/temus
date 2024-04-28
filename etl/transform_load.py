@@ -53,14 +53,6 @@ def pre_transform():
 
     return df_flat
 
-def create_aggregated_views():
-    #implement one time materialized views creation
-    pass
-
-def refresh_aggregated_views():
-    #implement refreshing materialized views after ingestion to flat table
-    pass 
-
 def load_to_db(data:pd.DataFrame):
 
     from sqlalchemy import create_engine, URL
@@ -83,7 +75,13 @@ def load_to_db(data:pd.DataFrame):
 
     print(f"[INFO] Loadaded newest data at: {time.ctime()}")
 
+def create_aggregated_views():
+    #implement one time materialized views creation
+    pass
+
+def refresh_aggregated_views():
+    #implement refreshing materialized views after ingestion to flat table
+    pass 
+
 data = pre_transform()
 load_to_db(data)
-
-
