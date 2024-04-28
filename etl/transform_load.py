@@ -34,22 +34,22 @@ def pre_transform():
     df_vendors.rename(columns = vendors_columns_renamed, inplace = True)
 
     df_products = df_products.astype({
-        "item": np.string_,
-        "category": np.string_, 
-        "vendor": np.string_, 
-        "sale_price": np.float64, 
-        "stock_status": np.string_
+        "item": str,
+        "category": str, 
+        "vendor": str, 
+        "sale_price": float, 
+        "stock_status": str
     })
 
     df_vendors = df_vendors.astype({
-        "vendor": np.string_, 
-        "shipping_cost": np.float64,
-        "customer_review_score": np.float64,
-        "number_of_feedbacks": np.int32
+        "vendor": str, 
+        "shipping_cost": float,
+        "customer_review_score": float,
+        "number_of_feedbacks": int
     })
 
     df_flat = df_products.merge(df_vendors, on = "vendor", how="inner")
-    df_flat.drop(["Unnamed: 0.1_x",  "Unnamed: 0_x"], axis = 1,inplace=True)
+    df_flat.drop(["Unnamed: 0.1_x",  "Unnamed: 0_x",'Unnamed: 0.1_y', 'Unnamed: 0_y'], axis = 1, inplace=True)
 
     return df_flat
 
@@ -62,9 +62,28 @@ def refresh_aggregated_views():
     pass 
 
 def load_to_db(data:pd.DataFrame):
-    #Implemet writing df_flat returned from transform directly to postgres
-    pass
+
+    from sqlalchemy import create_engine, URL
+    connection_url = URL.create(
+        "postgresql+psycopg2",
+        username="postgres",
+        password="root",
+        host="0.0.0.0",
+        database="postgres",
+        query={}
+    )
+    engine = create_engine(connection_url)
+
+    data.to_sql(
+        name = "items",
+        con = engine, 
+        if_exists = "replace",
+        index = False
+    )
+
+    print(f"[INFO] Loadaded newest data at: {time.ctime()}")
 
 data = pre_transform()
+load_to_db(data)
 
-print(data.head())
+
