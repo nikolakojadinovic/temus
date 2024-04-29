@@ -89,7 +89,7 @@ def get_analytics():
         data = OrderedDict((col, []) for col in columns)
         for row in result:
             for col, val in zip(columns, row):
-                data[col].append(round(val,2))
+                data[col].append(round(val,2) if val else "N/A")
         return json.dumps(data, default=str)
 
 @app.route("/analytics/compareVendors", methods = ["GET"])
@@ -123,6 +123,24 @@ def compare_vendors():
             for col, val in zip(columns, row):
                 data[col].append(val)
         return data
+
+@app.route("/analytics/vendorReviews")
+def get_vendor_reviews():
+    sql_query = f"""
+        select vendor, max(customer_review_score) as review_score 
+        from items  
+        group by 1 
+        order by 2 desc
+    """
+    with engine.connect() as conn:
+        response = conn.execute(text(sql_query))
+        columns = response.keys()
+        data = {col: [] for col in columns}
+        for row in response:
+            for col, val in zip(columns, row):
+                data[col].append(val)
+        return data
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port = 3000, debug=True)

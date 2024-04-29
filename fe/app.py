@@ -34,10 +34,19 @@ def get_vendor_comparison(category, stock_status):
     response = requests.get(f"{BACKEND_URL}/analytics/compareVendors", params = params)
     return response.json()
 
+def get_vendor_reviews():
+    response = requests.get(f"{BACKEND_URL}/analytics/vendorReviews")
+    return response.json()
+
+VENDOR_REVIEWS = pd.DataFrame(get_vendor_reviews()) #implemented here so it doesn't get called every time a page refreshes
+VENDOR_REVIEWS = VENDOR_REVIEWS.sort_values("review_score", ascending = False)
 def main():
 
     st.title("ElectroWorld - Real Time Analytics")
+    cont1,cont2 = st.columns(2)
+    
     head1, head2, head3, head4, head5, head6 = st.columns(6)
+    graph1, graph2 = st.columns(2)
     filter_categories, filter_vendors, filter_statuses = get_filters()
     DEFAULT_VENDOR = filter_vendors.index("ElectroWorld")
     DEFAULT_STOCKSTATUS = filter_statuses.index("In Stock")
@@ -73,12 +82,17 @@ def main():
     with head6:
         st.metric("Price+Cost MAX", "$"+str(stats["min_total_price"][0]))
 
-
+    
     st.write("Vendor Comparison")
-    st.dataframe(vendor_comparison)
-    
-    
-    
+    with graph1:
+        st.dataframe(vendor_comparison)
+    with graph2:
+        st.line_chart(
+            VENDOR_REVIEWS,
+            x = "vendor",
+            y = "review_score"
+        )
+        
 if __name__ == "__main__":
     main()
     
