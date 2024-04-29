@@ -291,10 +291,16 @@ services:
     ports:
       - "5432:5432" 
 
-  flask_app:
-    build: ./src/be/
+  temus-be:
+    build: ./be/
     ports:
       - 5000:5000
+
+  temus-fe:
+    build: ./fe/ 
+    ports: 
+      - 8501:8501
+
 volumes:
   postgres-db-volume:
   postgres_data:

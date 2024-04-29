@@ -7,6 +7,19 @@ import os
 from typing import List
 from io import StringIO
 import numpy as np 
+from sqlalchemy import text 
+
+def get_engine():
+    from sqlalchemy import create_engine, URL
+    connection_url = URL.create(
+        "postgresql+psycopg2",
+        username="postgres",
+        password="root",
+        host="0.0.0.0",
+        database="postgres",
+        query={}
+    )
+    return create_engine(connection_url)
 
 def read_from_raw_storage(dataset):
 
@@ -55,33 +68,39 @@ def pre_transform():
 
 def load_to_db(data:pd.DataFrame):
 
-    from sqlalchemy import create_engine, URL
-    connection_url = URL.create(
-        "postgresql+psycopg2",
-        username="postgres",
-        password="root",
-        host="0.0.0.0",
-        database="postgres",
-        query={}
-    )
-    engine = create_engine(connection_url)
+    engine = get_engine()
+
+    with engine.connect() as conn:
+        conn.execute(text("TRUNCATE TABLE items"))
 
     data.to_sql(
         name = "items",
         con = engine, 
-        if_exists = "replace",
+        if_exists = "append",
         index = False
     )
 
     print(f"[INFO] Loadaded newest data at: {time.ctime()}")
 
-def create_aggregated_views():
-    #implement one time materialized views creation
-    pass
+def update_aggregated_views():
 
-def refresh_aggregated_views():
-    #implement refreshing materialized views after ingestion to flat table
-    pass 
+    engine = get_engine()
 
+    with open("etl/views.sql", "r") as r:
+        queries = [q for q in r.read().split(";") if q and q != "\n"]
+
+    with engine.connect() as conn: 
+        transaction = conn.begin()
+        try:
+            for query in queries:
+                if query:
+                    conn.execute(text(query))
+            transaction.commit()
+        except Exception as e:
+            print(f"Failed updating materialized views: {e}.\n Performing rollback")
+            transaction.rollback()
+                    
+    
 data = pre_transform()
 load_to_db(data)
+update_aggregated_views()
