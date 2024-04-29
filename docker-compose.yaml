@@ -10,7 +10,7 @@ services:
   temus-be:
     build: ./be/
     ports:
-      - 5000:5000
+      - 3000:3000
   temus-fe:
     build: ./fe/ 
     ports: 
@@ -18,7 +18,7 @@ services:
   temus-etl:
     build: ./etl/ 
     ports: 
-     -3001:3001
+     - 3001:3001
 volumes:
   postgres-db-volume:
   postgres_data:
