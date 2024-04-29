@@ -29,7 +29,7 @@ def read_from_raw_storage(dataset):
     return pd.read_csv(f"{latest_data_path}/data.csv")
 
 def pre_transform():
-    
+
     products_columns_renamed = dict(zip(
         ["Item","Category","Vendor","Sale Price","Stock Status"],
         ["item","category", "vendor", "sale_price", "stock_status"]
@@ -38,7 +38,7 @@ def pre_transform():
         ["Vendor Name","Shipping Cost","Customer Review Score","Number of Feedbacks"],
         ["vendor", "shipping_cost","customer_review_score", "number_of_feedbacks"]
     ))  
-
+    
     df_products = read_from_raw_storage("products")
     df_vendors = read_from_raw_storage("vendors")
 
@@ -76,7 +76,7 @@ def load_to_db(data:pd.DataFrame):
         index = False
     )
 
-    print(f"[INFO] Loadaded newest data at: {time.ctime()}")
+    print(f"[TRANSFORM-LOAD] Loadaded newest data at: {time.ctime()}")
     
 def run():
     data = pre_transform()

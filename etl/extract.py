@@ -51,12 +51,11 @@ def get_data(dataset):
             f.write(LAST_MODIFIED)
 
     data = pd.read_html(url)    
-    print(f"[INFO] Pinged Temus server for dataset: {dataset} - Status Code: {response.status_code}")
     if response.status_code == 304:
-        print(f"[INFO] Skipping further read. Exiting.")
+        print(f"[EXTRACT] Status code: {response.status_code}")
     if response.status_code == 200:
-        print(f"[INFO] Data modified at source. Writing to raw storage.")
         write_to_raw_storage(data[0], dataset)   
+    return response.status_code
     
 
 
