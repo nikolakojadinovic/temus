@@ -100,7 +100,7 @@ def update_aggregated_views():
             print(f"Failed updating materialized views: {e}.\n Performing rollback")
             transaction.rollback()        
 
-def compose():
+def run():
     data = pre_transform()
     load_to_db(data)
     update_aggregated_views()

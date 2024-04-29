@@ -30,7 +30,7 @@ def write_to_raw_storage(data: pd.DataFrame, dataset: str):
     with open(f"{BASE_DIR}/_LATEST", "w+") as f:
         f.write(DATA_PATH)
 
-def load_to_raw_storage(dataset):
+def get_data(dataset):
 
     LAST_MODIFIED = None
 
@@ -51,12 +51,13 @@ def load_to_raw_storage(dataset):
             f.write(LAST_MODIFIED)
 
     data = pd.read_html(url)    
-    print(response.status_code)
+    print(f"[INFO] Pinged Temus server for dataset: {dataset} - Status Code: {response.status_code}")
     if response.status_code == 304:
-        return 
+        print(f"[INFO] Skipping further read. Exiting.")
     if response.status_code == 200:
+        print(f"[INFO] Data modified at source. Writing to raw storage.")
         write_to_raw_storage(data[0], dataset)   
+    
 
-def compose():
-    load_to_raw_storage("products")
-    load_to_raw_storage("vendors")
+
+    
