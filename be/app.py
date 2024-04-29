@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import time
 from sqlalchemy import text
 import json
+from collections import OrderedDict
 
 def get_engine():
     from sqlalchemy import create_engine, URL
@@ -65,7 +66,13 @@ def get_analytics():
         select 
             avg(sale_price) as avg_sale_price, 
             avg(sale_price + shipping_cost) as avg_total_price,
-            avg(shipping_cost) as avg_shipping_cost 
+            avg(shipping_cost) as avg_shipping_cost, 
+            max(sale_price) as max_sale_price, 
+            max(sale_price + shipping_cost) as max_total_price, 
+            max(shipping_cost) as max_shipping_cost, 
+            min(sale_price) as min_sale_price, 
+            min(sale_price + shipping_cost) as min_total_price, 
+            min(shipping_cost) as min_shipping_cost
         from items 
         where 
             category = '{category}' and 
@@ -74,14 +81,13 @@ def get_analytics():
     """
 
     with engine.connect() as conn:
-        response = conn.execute(text(sql_query))
-        columns = response.keys()
-        data = {col: [] for col in columns}
-        for row in response:
+        result = conn.execute(text(sql_query))
+        columns = list(result.keys())[::-1]
+        data = OrderedDict((col, []) for col in columns)
+        for row in result:
             for col, val in zip(columns, row):
                 data[col].append(round(val,2))
-        
-        return data
+        return json.dumps(data, default=str)
 
 @app.route("/analytics/compareVendors", methods = ["GET"])
 def compare_vendors():
