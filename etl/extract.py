@@ -12,9 +12,11 @@ datasets = {
     "vendors" :"https://temus-northstar.github.io/data_engineering_case_study_public/vendor_data.html"
 }
 
+RAW_PATH = os.environ.get('RAW_URL') if os.environ.get('RAW_URL') else 'raw'
+
 def write_to_raw_storage(data: pd.DataFrame, dataset: str):
 
-    BASE_DIR = f"raw/{dataset}"
+    BASE_DIR = f"{RAW_PATH}/{dataset}"
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     date_partition = now.split(" ")[0]
     hour_partition = now.split(" ")[1].replace(":","-")
@@ -34,11 +36,11 @@ def get_data(dataset):
 
     LAST_MODIFIED = None
 
-    if not os.listdir(f"raw/{dataset}").__contains__("_LAST_MODIFIED"):
-        with open(f"raw/{dataset}/_LAST_MODIFIED", "w+") as f: 
+    if not os.listdir(f"{RAW_PATH}/{dataset}").__contains__("_LAST_MODIFIED"):
+        with open(f"{RAW_PATH}/{dataset}/_LAST_MODIFIED", "w+") as f: 
             f.write("Thu, 01 Jan 1970 00:00:00 GMT")
 
-    with open(f"raw/{dataset}/_LAST_MODIFIED", "r") as f:
+    with open(f"{RAW_PATH}/{dataset}/_LAST_MODIFIED", "r") as f:
         LAST_MODIFIED = f.read()
 
     url = datasets[dataset]
@@ -47,7 +49,7 @@ def get_data(dataset):
 
     LAST_MODIFIED = response.headers.get("Last-Modified")
     if LAST_MODIFIED is not None:
-        with open(f"raw/{dataset}/_LAST_MODIFIED", "w+") as f: 
+        with open(f"{RAW_PATH}/{dataset}/_LAST_MODIFIED", "w+") as f: 
             f.write(LAST_MODIFIED)
 
     data = pd.read_html(url)    

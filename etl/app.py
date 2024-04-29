@@ -6,6 +6,7 @@ import time
 
 app = Flask(__name__)
 scheduler = APScheduler()
+scheduler.daemonic = False
 
 def etl_job():
     print(f"[INFO] Running extract job. Pinging server for any data changes...Time: {time.ctime()}")
@@ -20,10 +21,10 @@ def etl_job():
         print("No changes to the previous state of both datasets at source. Skipping transform")
     
 if __name__ == '__main__':
-    scheduler.add_job(id='etl_job', func=etl_job, trigger='interval', seconds=5)
+    scheduler.add_job(id='etl_job', func=etl_job, trigger='interval', seconds=60)
     scheduler.init_app(app)
     scheduler.start()
-    app.run(port=3001, threaded= True, debug = True)
+    app.run(port=3001,threaded=True,debug = True)
 
 
 

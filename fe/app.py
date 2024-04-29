@@ -2,9 +2,10 @@ import streamlit as st
 import requests 
 import pandas as pd 
 import json
+import os 
 
 st.set_page_config(layout="wide")
-BACKEND_URL = "http://127.0.0.1:3000"
+BACKEND_URL = "http://127.0.0.1:3000" if not os.environ.get("BACKEND_URL") else os.environ.get("BACKEND_URL")
 
 def get_filters():
     

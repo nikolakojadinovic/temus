@@ -3,6 +3,9 @@ import time
 from sqlalchemy import text
 import json
 from collections import OrderedDict
+import os
+
+RAW_PATH = os.environ.get('RAW_URL') if os.environ.get('RAW_URL') else 'raw'
 
 def get_engine():
     from sqlalchemy import create_engine, URL
@@ -10,10 +13,11 @@ def get_engine():
         "postgresql+psycopg2",
         username="postgres",
         password="root",
-        host="0.0.0.0",
+        host=os.environ.get('DB_URL') if os.environ.get('DB_URL') else "localhost",
         database="postgres",
         query={}
     )
+
     return create_engine(connection_url)
 
 engine = get_engine()
@@ -26,7 +30,6 @@ def get_stats():
 
 @app.route("/categories", methods = ['GET'])
 def get_categories():
-    
     sql_query = f"select distinct category from items" 
     with engine.connect() as conn:
         result = [elem[0] for elem in conn.execute(text(sql_query)).fetchall()]
@@ -49,10 +52,10 @@ def get_stock_statuses():
 @app.route("/latestIngest")
 def get_latest_ingest():
     
-    with open(f"raw/products/_LAST_MODIFIED") as f: 
+    with open(f"{RAW_PATH}/products/_LAST_MODIFIED") as f: 
         products = f.read()
 
-    with open(f"raw/vendors/_LAST_MODIFIED") as f: 
+    with open(f"{RAW_PATH}/vendors/_LAST_MODIFIED") as f: 
         vendors = f.read()
 
     return {"products": products, "vendors":vendors}
@@ -111,7 +114,7 @@ def compare_vendors():
         order by num_items asc;
 
     """
-
+    
     with engine.connect() as conn:
         response = conn.execute(text(sql_query))
         columns = response.keys()
@@ -122,4 +125,4 @@ def compare_vendors():
         return data
 
 if __name__ == "__main__":
-    app.run(port = 3000, debug=True)
+    app.run(host='0.0.0.0', port = 3000, debug=True)

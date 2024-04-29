@@ -11,14 +11,34 @@ services:
     build: ./be/
     ports:
       - 3000:3000
+    environment:
+      - DB_URL=postgres-main
+      - RAW_PATH=/app/raw
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - postgres-main
+    volumes:
+      - ./raw:/app/raw
   temus-fe:
     build: ./fe/ 
     ports: 
       - 8501:8501 
+    environment:
+      - BACKEND_URL=http://host.docker.internal:3000
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - temus-be
   temus-etl:
     build: ./etl/ 
     ports: 
      - 3001:3001
+    environment:
+      - RAW_PATH=/app/raw
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./raw:/app/raw
 volumes:
   postgres-db-volume:
   postgres_data:

@@ -9,6 +9,8 @@ from io import StringIO
 import numpy as np 
 from sqlalchemy import text 
 
+RAW_PATH = os.environ.get('RAW_URL') if os.environ.get('RAW_URL') else 'raw'
+
 def get_engine():
     from sqlalchemy import create_engine, URL
     connection_url = URL.create(
@@ -23,7 +25,7 @@ def get_engine():
 
 def read_from_raw_storage(dataset):
 
-    BASE_DIR = f"raw/{dataset}"
+    BASE_DIR = f"{RAW_PATH}/{dataset}"
     with open(f"{BASE_DIR}/_LATEST","r") as f:
         latest_data_path = f.read()
     return pd.read_csv(f"{latest_data_path}/data.csv")
