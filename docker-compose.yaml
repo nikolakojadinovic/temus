@@ -39,6 +39,8 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ./raw:/app/raw
+    depends_on:
+      - postgres-main
 volumes:
   postgres-db-volume:
   postgres_data:

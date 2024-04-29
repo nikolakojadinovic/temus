@@ -17,7 +17,7 @@ def get_engine():
         "postgresql+psycopg2",
         username="postgres",
         password="root",
-        host="0.0.0.0",
+        host=os.environ.get('DB_URL') if os.environ.get('DB_URL') else "localhost",
         database="postgres",
         query={}
     )
