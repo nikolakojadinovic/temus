@@ -98,9 +98,9 @@ def update_aggregated_views():
             transaction.commit()
         except Exception as e:
             print(f"Failed updating materialized views: {e}.\n Performing rollback")
-            transaction.rollback()
-                    
-    
-data = pre_transform()
-load_to_db(data)
-update_aggregated_views()
+            transaction.rollback()        
+
+def compose():
+    data = pre_transform()
+    load_to_db(data)
+    update_aggregated_views()

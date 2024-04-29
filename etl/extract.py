@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timedelta 
 import os 
 from io import StringIO
+import sys 
 
 datasets = {
     "products":"https://temus-northstar.github.io/data_engineering_case_study_public/product_data.html",
@@ -29,7 +30,7 @@ def write_to_raw_storage(data: pd.DataFrame, dataset: str):
     with open(f"{BASE_DIR}/_LATEST", "w+") as f:
         f.write(DATA_PATH)
 
-def load_data(dataset):
+def load_to_raw_storage(dataset):
 
     LAST_MODIFIED = None
 
@@ -56,5 +57,6 @@ def load_data(dataset):
     if response.status_code == 200:
         write_to_raw_storage(data[0], dataset)   
 
-load_data("products")
-load_data("vendors")
+def compose():
+    load_to_raw_storage("products")
+    load_to_raw_storage("vendors")
