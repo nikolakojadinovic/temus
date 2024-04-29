@@ -28,7 +28,6 @@ def read_from_raw_storage(dataset):
         latest_data_path = f.read()
     return pd.read_csv(f"{latest_data_path}/data.csv")
 
-
 def pre_transform():
     
     products_columns_renamed = dict(zip(
@@ -70,9 +69,6 @@ def load_to_db(data:pd.DataFrame):
 
     engine = get_engine()
 
-    with engine.connect() as conn:
-        conn.execute(text("TRUNCATE TABLE items"))
-
     data.to_sql(
         name = "items",
         con = engine, 
@@ -81,26 +77,7 @@ def load_to_db(data:pd.DataFrame):
     )
 
     print(f"[INFO] Loadaded newest data at: {time.ctime()}")
-
-def update_aggregated_views():
-
-    engine = get_engine()
-
-    with open("etl/views.sql", "r") as r:
-        queries = [q for q in r.read().split(";") if q and q != "\n"]
-
-    with engine.connect() as conn: 
-        transaction = conn.begin()
-        try:
-            for query in queries:
-                if query:
-                    conn.execute(text(query))
-            transaction.commit()
-        except Exception as e:
-            print(f"Failed updating materialized views: {e}.\n Performing rollback")
-            transaction.rollback()        
-
+    
 def run():
     data = pre_transform()
     load_to_db(data)
-    update_aggregated_views()
