@@ -36,6 +36,7 @@ services:
      - 3001:3001
     environment:
       - RAW_PATH=/app/raw
+      - DB_URL=postgres-main
       - PYTHONUNBUFFERED=1
     volumes:
       - ./raw:/app/raw
